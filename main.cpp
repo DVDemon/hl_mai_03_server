@@ -146,8 +146,10 @@ private:
     bool _helpRequested;
 };
 
-int main(int argc, char*argv[]) 
+int main([[maybe_unused]] int argc, [[maybe_unused]] char*argv[]) 
 {
     HTTPWebServer app;
-    return app.run(argc, argv);
+    
+    std::cout << "Starting server at port 8080 ..." << std::endl;
+    return app.run(argc, argv);;
 }
