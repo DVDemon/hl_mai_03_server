@@ -15,6 +15,7 @@ if(NOT ${Poco_FOUND})
 endif()
 
 include_directories(${Poco_INCLUDE_DIRS})
+link_directories("/usr/local/lib")
 
 add_executable(${EXAMPLE_BINARY} main.cpp )
 

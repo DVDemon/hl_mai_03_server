@@ -1,1 +1,1 @@
-sudo CMakeFiles/server
+CMakeFiles/server
