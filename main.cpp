@@ -38,33 +38,36 @@ using Poco::Util::OptionCallback;
 using Poco::Util::OptionSet;
 using Poco::Util::ServerApplication;
 
-class WebPageHandler: public HTTPRequestHandler
+class WebPageHandler : public HTTPRequestHandler
 {
 public:
-    WebPageHandler(const std::string& format): _format(format)
+    WebPageHandler(const std::string &format) : _format(format)
     {
     }
 
-    void handleRequest(HTTPServerRequest& request,
-                       HTTPServerResponse& response)
+    void handleRequest(HTTPServerRequest &request,
+                       HTTPServerResponse &response)
     {
+        std::cout << "webpage request" << std::endl;
         response.setChunkedTransferEncoding(true);
         response.setContentType("text/html");
 
-        std::ostream& ostr = response.send();
+        std::ostream &ostr = response.send();
         std::ifstream file;
 
         auto pos = request.getURI().find('?');
         std::string uri = request.getURI();
-        if(pos!=std::string::npos) uri = uri.substr(0,pos);
-        std::string name="content"+uri;
+        if (pos != std::string::npos)
+            uri = uri.substr(0, pos);
+        std::string name = "content" + uri;
         file.open(name, std::ifstream::binary);
 
         if (file.is_open())
-            while (file.good()){
+            while (file.good())
+            {
                 int sign = file.get();
-                if(sign>0)
-                ostr <<  (char)sign;
+                if (sign > 0)
+                    ostr << (char)sign;
             }
 
         file.close();
@@ -74,30 +77,86 @@ private:
     std::string _format;
 };
 
-class HTTPRequestFactory: public HTTPRequestHandlerFactory
+#include "Poco/JSON/Object.h"
+#include "Poco/Net/HTMLForm.h"
+class RequestHandler : public HTTPRequestHandler
 {
 public:
-    HTTPRequestFactory(const std::string& format):
-        _format(format)
+    RequestHandler(const std::string &format) : _format(format)
     {
     }
 
-    HTTPRequestHandler* createRequestHandler([[maybe_unused]]
-        const HTTPServerRequest& request)
+    void handleRequest(HTTPServerRequest &request,
+                       HTTPServerResponse &response)
     {
+        std::cout << "handle request" << std::endl;
+        Poco::Net::HTMLForm form(request);
+        response.setChunkedTransferEncoding(true);
+        response.setContentType("application/json");
+        std::ostream &ostr = response.send();
+        if (form.has("session_id"))
+        {
+            std::string session_str = form.get("session_id");
+            std::cout << "session_id:" << session_str << std::endl;
+                try
+                {
+                    Poco::JSON::Array arr;
+                    Poco::JSON::Object::Ptr root = new Poco::JSON::Object();
+                    root->set("id", session_str);
+                    root->set("some_text", "Some Text");
+                    arr.add(root);
+                    root = new Poco::JSON::Object();
+                    root->set("id", session_str);
+                    root->set("some_text", "Another Text");
+                    arr.add(root);
+                    Poco::JSON::Stringifier::stringify(arr, ostr);
+                }
+                catch (...)
+                {
+                    std::cout << "exception" << std::endl;
+                }
+            
+        }
+        response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
+private:
+    std::string _format;
+};
+
+static bool startsWith(const std::string &str, const std::string &prefix)
+{
+    return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix);
+}
+
+class HTTPRequestFactory : public HTTPRequestHandlerFactory
+{
+public:
+    HTTPRequestFactory(const std::string &format) : _format(format)
+    {
+    }
+
+    HTTPRequestHandler *createRequestHandler([[maybe_unused]] const HTTPServerRequest &request)
+    {
+        std::string math = "/request";
+        if (startsWith(request.getURI(), math))
+            return new RequestHandler(_format);
         return new WebPageHandler(_format);
     }
 
 private:
     std::string _format;
 };
+
 class HTTPWebServer : public Poco::Util::ServerApplication
 {
 public:
-    HTTPWebServer() : _helpRequested(false){
+    HTTPWebServer() : _helpRequested(false)
+    {
     }
 
-    ~HTTPWebServer(){
+    ~HTTPWebServer()
+    {
     }
 
 protected:
@@ -117,7 +176,6 @@ protected:
         ServerApplication::defineOptions(options);
     }
 
-
     int main([[maybe_unused]] const std::vector<std::string> &args)
     {
         if (!_helpRequested)
@@ -128,11 +186,11 @@ protected:
             std::string format(
                 config().getString("HTTPWebServer.format",
                                    DateTimeFormat::SORTABLE_FORMAT));
-            
+
             ServerSocket svs(Poco::Net::SocketAddress("0.0.0.0", port));
             HTTPServer srv(new HTTPRequestFactory(format),
                            svs, new HTTPServerParams);
-            
+
             std::cout << "Started server on port: 8080" << std::endl;
             srv.start();
 
@@ -146,10 +204,11 @@ private:
     bool _helpRequested;
 };
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] char*argv[]) 
+int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 {
     HTTPWebServer app;
-    
+
     std::cout << "Starting server at port 8080 ..." << std::endl;
-    return app.run(argc, argv);;
+    return app.run(argc, argv);
+    ;
 }
