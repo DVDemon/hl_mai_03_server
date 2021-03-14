@@ -1,14 +1,14 @@
 <html>
-<title>
-    Simple site
-</title>
 
 <head>
+    <title>
+        Simple site
+    </title>
     <h1>Simple Site</h1>
 </head>
 <style>
     #login {
-        border: 2px solid rgb(0, 0, 0);
+        border: 2px solid rgb(221, 25, 25);
         border-radius: 5px;
         padding: 15px;
         margin: 100px auto;
@@ -16,22 +16,20 @@
         height: 300px;
     }
 
-    h2{
-        color:rgb(0, 0, 0);
+    h2 {
+        color: rgb(80, 54, 194);
     }
-    label{
-        color: rgb(0, 0, 0);
-    }
-    input{
-        margin: 0px;
+
+    label {
+        color: rgb(63, 97, 50);
     }
 </style>
 <script>
-    function login(){
-        alert("sign in");
+    function login() {
+        document.getElementById("result").innerHTML = "<h1>Login successful</h1>";
     }
 
-    function signup(){
+    function signup() {
         alert("sign up");
     }
 </script>
@@ -49,6 +47,8 @@
         <br /><br />
         <input type="submit" value="Sign in" onclick="login()">
         <input type="submit" value="Sign up" onclick="signup()">
+
+        <div id="result"></div>
     </div>
 </body>
 

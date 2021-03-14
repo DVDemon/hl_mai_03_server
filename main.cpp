@@ -210,5 +210,5 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 
     std::cout << "Starting server at port 8080 ..." << std::endl;
     return app.run(argc, argv);
-    ;
+    
 }
