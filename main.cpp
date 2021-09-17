@@ -141,6 +141,7 @@ public:
         std::string math = "/request";
         if (startsWith(request.getURI(), math))
             return new RequestHandler(_format);
+            else
         return new WebPageHandler(_format);
     }
 
