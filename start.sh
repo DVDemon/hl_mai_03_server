@@ -1,1 +1,1 @@
-CMakeFiles/server
+build/server

@@ -48,7 +48,7 @@ public:
     void handleRequest(HTTPServerRequest &request,
                        HTTPServerResponse &response)
     {
-        std::cout << "webpage request" << std::endl;
+        //std::cout << "webpage request" << std::endl;
         response.setChunkedTransferEncoding(true);
         response.setContentType("text/html");
 
@@ -89,7 +89,7 @@ public:
     void handleRequest(HTTPServerRequest &request,
                        HTTPServerResponse &response)
     {
-        std::cout << "handle request" << std::endl;
+        //std::cout << "handle request" << std::endl;
         Poco::Net::HTMLForm form(request);
         response.setChunkedTransferEncoding(true);
         response.setContentType("application/json");
@@ -97,7 +97,7 @@ public:
         if (form.has("session_id"))
         {
             std::string session_str = form.get("session_id");
-            std::cout << "session_id:" << session_str << std::endl;
+            //std::cout << "session_id:" << session_str << std::endl;
                 try
                 {
                     Poco::JSON::Array arr;
