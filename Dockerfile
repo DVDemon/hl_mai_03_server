@@ -9,7 +9,3 @@ ENV LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 WORKDIR /hl_mai_03_server/CMakeFiles
 EXPOSE 8080
 CMD ["./server"]
-#docker build . -t my_server
-#docker images
-#sudo docker run -t -i my_server /bin/bash
-#sudo docker run -p 8080:8080 my_server

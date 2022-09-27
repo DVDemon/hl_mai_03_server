@@ -22,7 +22,6 @@
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) {
-                //alert(xhr.responseText);
                 var jsonData = xhr.responseText;
                 var jsObject = JSON.parse(jsonData);
                 var length = jsObject.length;
@@ -34,7 +33,6 @@
             }
             
         }
-        //load_wall();
     }
 </script>
 <body>

@@ -38,6 +38,10 @@ using Poco::Util::OptionCallback;
 using Poco::Util::OptionSet;
 using Poco::Util::ServerApplication;
 
+/**
+ * @brief Обработчик запросов на загрузку веб-страниц
+ *
+ */
 class WebPageHandler : public HTTPRequestHandler
 {
 public:
@@ -45,10 +49,10 @@ public:
     {
     }
 
-    void handleRequest(HTTPServerRequest &request,
-                       HTTPServerResponse &response)
+    void handleRequest(HTTPServerRequest & request,
+                       HTTPServerResponse & response)
     {
-        //std::cout << "webpage request" << std::endl;
+        std::cout << "Handle web page" << std::endl;
         response.setChunkedTransferEncoding(true);
         response.setContentType("text/html");
 
@@ -77,6 +81,9 @@ private:
     std::string _format;
 };
 
+/**
+ * @brief Обработчик запросов на возвращение данных по session_id
+ */
 #include "Poco/JSON/Object.h"
 #include "Poco/Net/HTMLForm.h"
 class RequestHandler : public HTTPRequestHandler
@@ -89,33 +96,32 @@ public:
     void handleRequest(HTTPServerRequest &request,
                        HTTPServerResponse &response)
     {
-        //std::cout << "handle request" << std::endl;
-        Poco::Net::HTMLForm form(request);
+        std::cout << "Handle request" << std::endl;
+
+        Poco::Net::HTMLForm form(request);      
         response.setChunkedTransferEncoding(true);
         response.setContentType("application/json");
         std::ostream &ostr = response.send();
         if (form.has("session_id"))
         {
             std::string session_str = form.get("session_id");
-            //std::cout << "session_id:" << session_str << std::endl;
-                try
-                {
-                    Poco::JSON::Array arr;
-                    Poco::JSON::Object::Ptr root = new Poco::JSON::Object();
-                    root->set("id", session_str);
-                    root->set("some_text", "Some Text");
-                    arr.add(root);
-                    root = new Poco::JSON::Object();
-                    root->set("id", session_str);
-                    root->set("some_text", "Another Text");
-                    arr.add(root);
-                    Poco::JSON::Stringifier::stringify(arr, ostr);
-                }
-                catch (...)
-                {
-                    std::cout << "exception" << std::endl;
-                }
-            
+            try
+            {
+                Poco::JSON::Array arr;
+                Poco::JSON::Object::Ptr root = new Poco::JSON::Object();
+                root->set("id", session_str);
+                root->set("some_text", "Some Text");
+                arr.add(root);
+                root = new Poco::JSON::Object();
+                root->set("id", session_str);
+                root->set("some_text", "Another Text");
+                arr.add(root);
+                Poco::JSON::Stringifier::stringify(arr, ostr);
+            }
+            catch (...)
+            {
+                std::cout << "exception" << std::endl;
+            }
         }
         response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_INTERNAL_SERVER_ERROR);
     }
@@ -141,8 +147,8 @@ public:
         std::string math = "/request";
         if (startsWith(request.getURI(), math))
             return new RequestHandler(_format);
-            else
-        return new WebPageHandler(_format);
+        else
+            return new WebPageHandler(_format);
     }
 
 private:
@@ -205,7 +211,7 @@ private:
     bool _helpRequested;
 };
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
+int main(int argc, char *argv[])
 {
     HTTPWebServer app;
 
