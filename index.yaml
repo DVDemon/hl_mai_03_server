@@ -4,9 +4,8 @@ info:
   title: 'Sample Server'
   description: Demo of REST API
 servers:
-  - url: http://192.168.64.6/
+  - url: http://192.168.64.6:8080/
     description: Sample server
-
 paths:
   /request:
     parameters:
@@ -24,7 +23,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Session'
+                $ref: '#/components/schemas/Sessions'
         404:
           description: No session found for the provided `spacecraftId`
           content:
@@ -42,6 +41,12 @@ components:
     SessionId:
       description: The unique identifier of a session
       type: string
+    
+    Sessions:
+      type: array
+      items:
+        $ref: '#/components/schemas/Session'
+
     Session:
       type: object
       required:
