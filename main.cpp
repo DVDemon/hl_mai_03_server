@@ -59,6 +59,7 @@ public:
         std::ostream &ostr = response.send();
         std::ifstream file;
 
+        std::cout << request.getURI() << std::endl;
         auto pos = request.getURI().find('?');
         std::string uri = request.getURI();
         if (pos != std::string::npos)

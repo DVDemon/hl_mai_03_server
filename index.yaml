@@ -4,7 +4,7 @@ info:
   title: 'Sample Server'
   description: Demo of REST API
 servers:
-  - url: http://192.168.64.6:8080/
+  - url: http://192.168.64.6:8080
     description: Sample server
 paths:
   /request:
