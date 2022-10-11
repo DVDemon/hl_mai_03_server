@@ -8,15 +8,15 @@ servers:
     description: Sample server
 paths:
   /request:
-    parameters:
-      - in: query
-        name: session_id
-        description: The unique identifier of some session
-        required: true
-        schema:
-          $ref: '#/components/schemas/SessionId'
     get:
       summary: Read a session
+      parameters:
+        - in: query
+          name: session_id
+          description: The unique identifier of some session
+          required: true
+          schema:
+            $ref: '#/components/schemas/SessionId'
       responses:
         '200':
           description: The session corresponding to the provided `sessionId`
