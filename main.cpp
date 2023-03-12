@@ -100,10 +100,9 @@ public:
         std::cout << "Handle request" << std::endl;
 
         Poco::Net::HTMLForm form(request);      
-        response.setChunkedTransferEncoding(true);
-        response.setContentType("application/json");
-        std::ostream &ostr = response.send();
-        if (form.has("session_id"))
+        
+        
+        if (form.has("session_id")&&(request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET))
         {
             std::string session_str = form.get("session_id");
             try
@@ -117,14 +116,30 @@ public:
                 root->set("id", session_str);
                 root->set("some_text", "Another Text");
                 arr.add(root);
+
+                response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_OK);
+                response.setChunkedTransferEncoding(true);
+                response.setContentType("application/json");
+                std::ostream &ostr = response.send();
                 Poco::JSON::Stringifier::stringify(arr, ostr);
             }
-            catch (...)
+            catch (std::exception &ex)
             {
                 std::cout << "exception" << std::endl;
+                response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_INTERNAL_SERVER_ERROR);
+                response.setChunkedTransferEncoding(true);
+                response.setContentType("application/json");
+                Poco::JSON::Object::Ptr root = new Poco::JSON::Object();
+                root->set("type","/errors/internal_exception");
+                root->set("title","Internal exception");
+                root->set("status","500");
+                root->set("detail",ex.what());
+                root->set("instance","/request");
+                std::ostream &ostr = response.send();
+                Poco::JSON::Stringifier::stringify(root, ostr);    
             }
         }
-        response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_INTERNAL_SERVER_ERROR);
+        
     }
 
 private:
@@ -158,65 +173,24 @@ private:
 
 class HTTPWebServer : public Poco::Util::ServerApplication
 {
-public:
-    HTTPWebServer() : _helpRequested(false)
-    {
-    }
-
-    ~HTTPWebServer()
-    {
-    }
-
 protected:
-    void initialize(Application &self)
-    {
-        loadConfiguration();
-        ServerApplication::initialize(self);
-    }
-
-    void uninitialize()
-    {
-        ServerApplication::uninitialize();
-    }
-
-    void defineOptions(OptionSet &options)
-    {
-        ServerApplication::defineOptions(options);
-    }
-
     int main([[maybe_unused]] const std::vector<std::string> &args)
     {
-        if (!_helpRequested)
-        {
-            unsigned short port = (unsigned short)
-                                      config()
-                                          .getInt("HTTPWebServer.port", 8080);
-            std::string format(
-                config().getString("HTTPWebServer.format",
-                                   DateTimeFormat::SORTABLE_FORMAT));
+        ServerSocket svs(Poco::Net::SocketAddress("0.0.0.0", 8080));
+        HTTPServer srv(new HTTPRequestFactory(DateTimeFormat::SORTABLE_FORMAT),svs, new HTTPServerParams);
 
-            ServerSocket svs(Poco::Net::SocketAddress("0.0.0.0", port));
-            HTTPServer srv(new HTTPRequestFactory(format),
-                           svs, new HTTPServerParams);
+        std::cout << "Started server on port: 8080" << std::endl;
+        srv.start();
+        waitForTerminationRequest();
+        srv.stop();
 
-            std::cout << "Started server on port: 8080" << std::endl;
-            srv.start();
-
-            waitForTerminationRequest();
-            srv.stop();
-        }
         return Application::EXIT_OK;
     }
-
-private:
-    bool _helpRequested;
 };
 
 int main(int argc, char *argv[])
 {
     HTTPWebServer app;
-
-    std::cout << "Starting server at port 8080 ..." << std::endl;
     return app.run(argc, argv);
     
 }
