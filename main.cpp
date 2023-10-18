@@ -97,7 +97,7 @@ public:
     void handleRequest(HTTPServerRequest &request,
                        HTTPServerResponse &response)
     {
-        std::cout << "Handle request" << std::endl;
+        //std::cout << "Handle request" << std::endl;
 
         Poco::Net::HTMLForm form(request);      
         
